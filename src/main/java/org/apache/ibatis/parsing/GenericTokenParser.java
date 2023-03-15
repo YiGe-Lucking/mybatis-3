@@ -15,13 +15,31 @@
  */
 package org.apache.ibatis.parsing;
 
+import org.apache.ibatis.parsing.TokenHandler;
+
 /**
  * @author Clinton Begin
+ *
+ * 通用token解析器
+ * token 解析器工作原理：
+ * <p>
+ *  根据开始字符串和结束字符串解析出里面的表达式(例如${name} -> name),然后通过tokenHandler进行解析处理
+ * <p/>
+ *
  */
 public class GenericTokenParser {
 
+  /**
+   * 开始Token字符串
+   */
   private final String openToken;
+  /**
+   * 结束的token字符串
+   */
   private final String closeToken;
+  /**
+   * token 处理器
+   */
   private final TokenHandler handler;
 
   public GenericTokenParser(String openToken, String closeToken, TokenHandler handler) {

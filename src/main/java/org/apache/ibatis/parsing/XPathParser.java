@@ -31,6 +31,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.ibatis.builder.BuilderException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -43,13 +44,29 @@ import org.xml.sax.SAXParseException;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ * 基于Java XPath解析器,用于解析MyBatis的mybatis-config.xml 和 **Mapper.xml 等xml配置文件
  */
 public class XPathParser {
-
+  /**
+   *  XML Document 对象 XML 文件被解析后生成对应的{@link org.w3c.dom.Document} 对象
+   */
   private final Document document;
+  /**
+   * 是否检验
+   */
   private boolean validation;
+  /**
+   * XML实体解析器,一般通过自定义的{@link org.apache.ibatis.builder.xml.XMLMapperEntityResolver}从本地获取DTD文件解析
+   */
   private EntityResolver entityResolver;
+  /**
+   * 变量对象,用来替换需要动态配置的属性值
+   */
   private Properties variables;
+  /**
+   * Java XPath对象,用于查询xml中的节点和元素
+   */
   private XPath xpath;
 
   public XPathParser(String xml) {
@@ -141,7 +158,9 @@ public class XPathParser {
   }
 
   public String evalString(Object root, String expression) {
+    // 获得值
     String result = (String) evaluate(expression, root, XPathConstants.STRING);
+    //
     return PropertyParser.parse(result, variables);
   }
 
@@ -211,15 +230,18 @@ public class XPathParser {
   }
 
   public XNode evalNode(Object root, String expression) {
+    // 获得Node对象
     Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
     if (node == null) {
       return null;
     }
+    // 封装成XNode对象
     return new XNode(this, node, variables);
   }
 
   private Object evaluate(String expression, Object root, QName returnType) {
     try {
+      // 通过XPath结合表达式获取Document对象中的结果
       return xpath.evaluate(expression, root, returnType);
     } catch (Exception e) {
       throw new BuilderException("Error evaluating XPath.  Cause: " + e, e);
@@ -229,6 +251,7 @@ public class XPathParser {
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
+      // 创建DocumentBuilderFactory对象
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       factory.setValidating(validation);
@@ -238,10 +261,10 @@ public class XPathParser {
       factory.setIgnoringElementContentWhitespace(false);
       factory.setCoalescing(false);
       factory.setExpandEntityReferences(true);
-
+      // 创建DocumentBuilder对象
       DocumentBuilder builder = factory.newDocumentBuilder();
-      builder.setEntityResolver(entityResolver);
-      builder.setErrorHandler(new ErrorHandler() {
+      builder.setEntityResolver(entityResolver); // 设置实体解析器
+      builder.setErrorHandler(new ErrorHandler() { // 设置异常处理器,实现都空的
         @Override
         public void error(SAXParseException exception) throws SAXException {
           throw exception;
@@ -257,6 +280,7 @@ public class XPathParser {
           // NOP
         }
       });
+      // 解析xml文件,将文件加载到Document中
       return builder.parse(inputSource);
     } catch (Exception e) {
       throw new BuilderException("Error creating document instance.  Cause: " + e, e);

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Supplier;
+import org.apache.ibatis.parsing.XPathParser;
 
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Element;

@@ -20,6 +20,8 @@ import java.util.Properties;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ *
  */
 public class PropertyParser {
 
@@ -53,11 +55,20 @@ public class PropertyParser {
   }
 
   public static String parse(String string, Properties variables) {
+    // 创建VariableTokenHandler对象
     VariableTokenHandler handler = new VariableTokenHandler(variables);
+    // 创建GenericTokenParser对象
     GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
+    // 执行解析
     return parser.parse(string);
   }
 
+  /**
+   * VariableTokenHandler是PropertyParser的内部静态类 变量Token处理器
+   * <p>
+   *  根据 Properties variables变量对象将Token 动态值解析成实际值
+   * </p>
+   */
   private static class VariableTokenHandler implements TokenHandler {
     private final Properties variables;
     private final boolean enableDefaultValue;
